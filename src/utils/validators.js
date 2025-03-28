@@ -75,3 +75,20 @@ export const isValidEmploymentDate = (employmentDate) => {
   
   return employmentDateObj <= today;
 };
+
+/**
+ * İşe alım tarihinin doğum tarihinden sonra olup olmadığını kontrol eder
+ * @param {string} employmentDate - İşe alım tarihi (YYYY-MM-DD formatında)
+ * @param {string} birthDate - Doğum tarihi (YYYY-MM-DD formatında)
+ * @returns {boolean} - İşe alım tarihi doğum tarihinden sonra ise true, değilse false
+ */
+export const isEmploymentDateAfterBirthDate = (employmentDate, birthDate) => {
+  // Tarih formatları geçerli mi kontrol et
+  if (!isValidDate(employmentDate) || !isValidDate(birthDate)) return false;
+  
+  const employmentDateObj = new Date(employmentDate);
+  const birthDateObj = new Date(birthDate);
+  
+  // İşe alım tarihi doğum tarihinden sonra olmalıdır (küçük olamaz)
+  return employmentDateObj > birthDateObj;
+};

@@ -73,6 +73,7 @@ export const TR_TRANSLATIONS = {
   'phone_exists': 'Bu telefon numarası başka bir çalışan tarafından kullanılıyor',
   'invalid_birth_date': 'Geçerli bir doğum tarihi giriniz (18 yaşından büyük olmalı)',
   'invalid_hire_date': 'Geçerli bir işe başlama tarihi giriniz (bugün veya daha öncesi olmalı)',
+  'hire_date_before_birth_date': 'İşe başlama tarihi doğum tarihinden önce olamaz',
   
   // Bildirimler
   'employee_added': 'Çalışan başarıyla eklendi',
@@ -158,6 +159,7 @@ export const EN_TRANSLATIONS = {
   'phone_exists': 'This phone number is already used by another employee',
   'invalid_birth_date': 'Please enter a valid birth date (must be at least 18 years old)',
   'invalid_hire_date': 'Please enter a valid hire date (must be today or earlier)',
+  'hire_date_before_birth_date': 'Hire date cannot be before birth date',
   
   // Notifications
   'employee_added': 'Employee added successfully',

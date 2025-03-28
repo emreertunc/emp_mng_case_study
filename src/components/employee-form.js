@@ -8,7 +8,8 @@ import {
   isValidPhone, 
   isValidBirthDate, 
   isValidEmploymentDate,
-  formatPhoneNumber
+  formatPhoneNumber,
+  isEmploymentDateAfterBirthDate
 } from '../utils/validators.js';
 import './confirm-dialog.js';
 import { EmployeeService } from '../services/employee-service.js';
@@ -319,6 +320,8 @@ export class EmployeeForm extends LitElement {
       errors.dateOfEmployment = t('field_required', {field: t('hire_date')});
     } else if (!isValidEmploymentDate(dateOfEmployment)) {
       errors.dateOfEmployment = t('invalid_hire_date');
+    } else if (!isEmpty(dateOfBirth) && !isEmploymentDateAfterBirthDate(dateOfEmployment, dateOfBirth)) {
+      errors.dateOfEmployment = t('hire_date_before_birth_date');
     }
     
     this.errors = errors;
