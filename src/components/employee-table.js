@@ -69,19 +69,36 @@ export class EmployeeTable extends LitElement {
           background-color: #e8f5e9;
           color: #1b5e20;
         }
+        
+        .danger-button {
+          background-color: #FF6600; /* ING turuncu rengi */
+          color: white;
+          border: none;
+          padding: 6px 12px;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 14px;
+          margin-left: 8px;
+        }
+        
+        .danger-button:hover {
+          background-color: #E65C00; /* ING turuncu biraz daha koyu tonu */
+        }
       `
     ];
   }
 
   static get properties() {
     return {
-      employees: { type: Array }
+      employees: { type: Array },
+      hasSelectedEmployees: { type: Boolean }
     };
   }
 
   constructor() {
     super();
     this.employees = [];
+    this.hasSelectedEmployees = false;
   }
 
   render() {
@@ -93,6 +110,16 @@ export class EmployeeTable extends LitElement {
               <th class="checkbox-cell">
                 <input type="checkbox" @change=${this._handleSelectAll} />
               </th>
+              <th colspan="9" style="text-align: right;">
+                ${this.hasSelectedEmployees ? html`
+                  <button class="danger-button" @click=${this._handleDeleteSelected}>
+                    ${t('delete_selected')}
+                  </button>
+                ` : ''}
+              </th>
+            </tr>
+            <tr>
+              <th class="checkbox-cell"></th>
               <th>${t('first_name')}</th>
               <th>${t('last_name')}</th>
               <th>${t('hire_date')}</th>
@@ -108,7 +135,7 @@ export class EmployeeTable extends LitElement {
             ${this.employees.map(employee => html`
               <tr>
                 <td class="checkbox-cell">
-                  <input type="checkbox" .value=${employee.id} />
+                  <input type="checkbox" .value=${employee.id} @change=${this._handleCheckboxChange} />
                 </td>
                 <td>${employee.firstName}</td>
                 <td>${employee.lastName}</td>
@@ -155,6 +182,26 @@ export class EmployeeTable extends LitElement {
     checkboxes.forEach(checkbox => {
       checkbox.checked = e.target.checked;
     });
+    this.hasSelectedEmployees = e.target.checked && checkboxes.length > 0;
+  }
+  
+  _handleCheckboxChange(e) {
+    const checkboxes = this.shadowRoot.querySelectorAll('tbody input[type="checkbox"]:checked');
+    this.hasSelectedEmployees = checkboxes.length > 0;
+  }
+  
+  _getSelectedEmployeeIds() {
+    const checkboxes = this.shadowRoot.querySelectorAll('tbody input[type="checkbox"]:checked');
+    return Array.from(checkboxes).map(checkbox => checkbox.value);
+  }
+  
+  _handleDeleteSelected() {
+    const selectedIds = this._getSelectedEmployeeIds();
+    if (selectedIds.length > 0) {
+      this.dispatchEvent(new CustomEvent('delete-selected', {
+        detail: { ids: selectedIds }
+      }));
+    }
   }
   
   _handleEdit(employee) {
@@ -167,6 +214,27 @@ export class EmployeeTable extends LitElement {
     this.dispatchEvent(new CustomEvent('delete', {
       detail: employee
     }));
+  }
+  
+  /**
+   * Tüm checkbox seçimlerini sıfırla
+   * Bu metot employee-list bileşeni tarafından çağrılır
+   */
+  resetSelections() {
+    // Ana checkbox'u temizle
+    const headerCheckbox = this.shadowRoot.querySelector('thead input[type="checkbox"]');
+    if (headerCheckbox) {
+      headerCheckbox.checked = false;
+    }
+    
+    // Tüm satır checkbox'larını temizle
+    const checkboxes = this.shadowRoot.querySelectorAll('tbody input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+      checkbox.checked = false;
+    });
+    
+    // Seçim durumunu güncelle ("Seçilenleri Sil" butonunu gizlemek için)
+    this.hasSelectedEmployees = false;
   }
 }
 

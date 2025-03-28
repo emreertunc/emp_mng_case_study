@@ -20,6 +20,7 @@ export const TR_TRANSLATIONS = {
   'no_employees': 'Henüz çalışan bulunmuyor.',
   'edit': 'Düzenle',
   'delete': 'Sil',
+  'delete_selected': 'Seçilenleri Sil',
   'list_view': 'Liste Görünümü',
   'table_view': 'Tablo Görünümü',
   
@@ -59,6 +60,7 @@ export const TR_TRANSLATIONS = {
   'confirm_add': 'Yeni çalışan eklemek istediğinizden emin misiniz?',
   'confirm_update': '{firstName} {lastName} adlı çalışanın bilgilerini güncellemek istediğinizden emin misiniz?',
   'confirm_delete': '{firstName} {lastName} adlı çalışanı silmek istediğinizden emin misiniz?',
+  'confirm_delete_multiple': 'Seçilen çalışanları silmek istediğinizden emin misiniz?',
   'confirm_title_add': 'Çalışan Ekleme',
   'confirm_title_update': 'Çalışan Güncelleme',
   'confirm_title_delete': 'Çalışan Silme',
@@ -106,6 +108,7 @@ export const EN_TRANSLATIONS = {
   'no_employees': 'No employees found.',
   'edit': 'Edit',
   'delete': 'Delete',
+  'delete_selected': 'Delete Selected',
   'list_view': 'List View',
   'table_view': 'Table View',
   
@@ -145,6 +148,7 @@ export const EN_TRANSLATIONS = {
   'confirm_add': 'Are you sure you want to add a new employee?',
   'confirm_update': 'Are you sure you want to update the information for {firstName} {lastName}?',
   'confirm_delete': 'Are you sure you want to delete {firstName} {lastName}?',
+  'confirm_delete_multiple': 'Are you sure you want to delete the selected employees?',
   'confirm_title_add': 'Add Employee',
   'confirm_title_update': 'Update Employee',
   'confirm_title_delete': 'Delete Employee',

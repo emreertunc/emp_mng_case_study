@@ -62,7 +62,9 @@ export class EmployeeList extends LitElement {
       totalPages: { type: Number },
       searchQuery: { type: String },
       showDeleteConfirm: { type: Boolean },
-      employeeToDelete: { type: Object }
+      employeeToDelete: { type: Object },
+      employeeIdsToDelete: { type: Array },
+      isMultipleDelete: { type: Boolean }
     };
   }
 
@@ -79,6 +81,8 @@ export class EmployeeList extends LitElement {
     this.searchQuery = '';
     this.showDeleteConfirm = false;
     this.employeeToDelete = null;
+    this.employeeIdsToDelete = [];
+    this.isMultipleDelete = false;
     
     this._loadEmployees();
   }
@@ -98,7 +102,9 @@ export class EmployeeList extends LitElement {
         ${this.showDeleteConfirm ? html`
           <confirm-dialog
             title="${t('confirm_title_delete')}"
-            message="${this.employeeToDelete ? t('confirm_delete', {firstName: this.employeeToDelete.firstName, lastName: this.employeeToDelete.lastName}) : t('confirm_delete', {firstName: '', lastName: ''})}"
+            message="${this.isMultipleDelete 
+              ? t('confirm_delete_multiple') 
+              : (this.employeeToDelete ? t('confirm_delete', {firstName: this.employeeToDelete.firstName, lastName: this.employeeToDelete.lastName}) : t('confirm_delete', {firstName: '', lastName: ''}))}"
             @proceed=${this._confirmDelete}
             @cancel=${() => this.showDeleteConfirm = false}
           ></confirm-dialog>
@@ -167,6 +173,7 @@ export class EmployeeList extends LitElement {
           .employees=${this.displayedEmployees}
           @edit=${this._handleEditEmployee}
           @delete=${this._handleDeleteEmployee}
+          @delete-selected=${this._handleDeleteSelectedEmployees}
         ></employee-table>
       `;
     } else {
@@ -294,12 +301,51 @@ export class EmployeeList extends LitElement {
     this.showDeleteConfirm = true;
   }
   
+  _handleDeleteSelectedEmployees(e) {
+    const { ids } = e.detail;
+    if (ids && ids.length > 0) {
+      this.employeeIdsToDelete = ids;
+      this.isMultipleDelete = true;
+      this.showDeleteConfirm = true;
+    }
+  }
+  
   _confirmDelete() {
-    if (this.employeeToDelete) {
+    if (this.isMultipleDelete) {
+      // Toplu silme işlemi
+      if (this.employeeIdsToDelete && this.employeeIdsToDelete.length > 0) {
+        this.employeeIdsToDelete.forEach(id => {
+          this.employeeService.delete(id);
+        });
+        this.employeeIdsToDelete = [];
+        this.isMultipleDelete = false;
+        this.showDeleteConfirm = false;
+        
+        // Silme işlemi tamamlandıktan sonra tüm seçimleri sıfırlama
+        this._resetAllSelections();
+        this._loadEmployees();
+      }
+    } else if (this.employeeToDelete) {
+      // Tekli silme işlemi
       this.employeeService.delete(this.employeeToDelete.id);
       this.showDeleteConfirm = false;
       this.employeeToDelete = null;
       this._loadEmployees();
+    }
+  }
+  
+  /**
+   * Tüm seçimleri sıfırla ve tüm checkbox'ları temizle
+   * @private
+   */
+  _resetAllSelections() {
+    // Tablo görünümündeyken tüm checkbox'ları temizle
+    if (this.viewMode === 'table') {
+      const tableElement = this.shadowRoot.querySelector('employee-table');
+      if (tableElement) {
+        // Tablo bileşenindeki tüm seçimleri sıfırla
+        tableElement.resetSelections();
+      }
     }
   }
   
