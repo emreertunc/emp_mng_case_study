@@ -14,14 +14,38 @@ class EmployeeApp extends LitElement {
       :host {
         display: block;
         font-family: Arial, sans-serif;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      
+
+      
+      .router-outlet {
+        padding-top: 16px;
+        flex: 1;
+      }
+
+      .footer {
+        background-color: #f5f5f5;
+        padding: 16px;
+        text-align: center;
+        border-top: 1px solid #ddd;
+        font-size: 14px;
+        color: #666;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        z-index: 100;
       }
       
       .app-container {
         padding: 16px;
-      }
-      
-      .router-outlet {
-        padding-top: 16px;
+        padding-bottom: 60px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
       }
     `;
   }
@@ -46,6 +70,10 @@ class EmployeeApp extends LitElement {
         <navigation-menu></navigation-menu>
         
         <div id="outlet" class="router-outlet"></div>
+        
+        <footer class="footer">
+          Made By Emre Ertunc for ING Hubs Case Study
+        </footer>
       </div>
     `;
   }
