@@ -25,4 +25,4 @@ npm run serve
 
 ## Live Demo
 
-Test the application at [https://ing-employee-app.netlify.com](https://ing-employee-app.netlify.com)
+Test the application at [https://ing-case-study.netlify.app/](https://ing-case-study.netlify.app/)
