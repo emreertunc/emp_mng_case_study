@@ -82,7 +82,37 @@ export class EmployeeTable extends LitElement {
         }
         
         .danger-button:hover {
-          background-color: #E65C00; /* ING turuncu biraz daha koyu tonu */
+          background-color: #E65C00;
+        }
+        
+        th {
+          cursor: pointer;
+          position: relative;
+          user-select: none;
+          white-space: nowrap;
+          min-width: 100px;
+        }
+        
+        th.actions-cell, th.checkbox-cell {
+          cursor: default;
+        }
+        
+        th.sorted-asc, th.sorted-desc {
+          background-color: #f5f5f5;
+        }
+        
+        .sort-icon {
+          font-size: 10px;
+          width: 10px;
+          margin-left: 3px;
+          display: inline-block;
+          opacity: 0.3;
+          vertical-align: middle;
+        }
+        
+        th.sorted-asc .sort-icon-asc,
+        th.sorted-desc .sort-icon-desc {
+          opacity: 1;
         }
       `
     ];
@@ -91,7 +121,9 @@ export class EmployeeTable extends LitElement {
   static get properties() {
     return {
       employees: { type: Array },
-      hasSelectedEmployees: { type: Boolean }
+      hasSelectedEmployees: { type: Boolean },
+      sortField: { type: String },
+      sortDirection: { type: String }
     };
   }
 
@@ -99,6 +131,8 @@ export class EmployeeTable extends LitElement {
     super();
     this.employees = [];
     this.hasSelectedEmployees = false;
+    this.sortField = 'firstName';
+    this.sortDirection = 'asc';
   }
 
   render() {
@@ -120,14 +154,30 @@ export class EmployeeTable extends LitElement {
             </tr>
             <tr>
               <th class="checkbox-cell"></th>
-              <th>${t('first_name')}</th>
-              <th>${t('last_name')}</th>
-              <th>${t('hire_date')}</th>
-              <th>${t('birth_date')}</th>
-              <th>${t('phone')}</th>
-              <th>${t('email')}</th>
-              <th>${t('department')}</th>
-              <th>${t('position')}</th>
+              <th @click=${() => this._handleSort('firstName')} class="${this.sortField === 'firstName' ? 'sorted-' + this.sortDirection : ''}">
+                <span>${t('first_name')}</span>${this._getSortIcon('firstName')}
+              </th>
+              <th @click=${() => this._handleSort('lastName')} class="${this.sortField === 'lastName' ? 'sorted-' + this.sortDirection : ''}">
+                <span>${t('last_name')}</span>${this._getSortIcon('lastName')}
+              </th>
+              <th @click=${() => this._handleSort('dateOfEmployment')} class="${this.sortField === 'dateOfEmployment' ? 'sorted-' + this.sortDirection : ''}">
+                <span>${t('hire_date')}</span>${this._getSortIcon('dateOfEmployment')}
+              </th>
+              <th @click=${() => this._handleSort('dateOfBirth')} class="${this.sortField === 'dateOfBirth' ? 'sorted-' + this.sortDirection : ''}">
+                <span>${t('birth_date')}</span>${this._getSortIcon('dateOfBirth')}
+              </th>
+              <th @click=${() => this._handleSort('phoneNumber')} class="${this.sortField === 'phoneNumber' ? 'sorted-' + this.sortDirection : ''}">
+                <span>${t('phone')}</span>${this._getSortIcon('phoneNumber')}
+              </th>
+              <th @click=${() => this._handleSort('email')} class="${this.sortField === 'email' ? 'sorted-' + this.sortDirection : ''}">
+                <span>${t('email')}</span>${this._getSortIcon('email')}
+              </th>
+              <th @click=${() => this._handleSort('department')} class="${this.sortField === 'department' ? 'sorted-' + this.sortDirection : ''}">
+                <span>${t('department')}</span>${this._getSortIcon('department')}
+              </th>
+              <th @click=${() => this._handleSort('position')} class="${this.sortField === 'position' ? 'sorted-' + this.sortDirection : ''}">
+                <span>${t('position')}</span>${this._getSortIcon('position')}
+              </th>
               <th class="actions-cell">${t('actions')}</th>
             </tr>
           </thead>
@@ -216,25 +266,44 @@ export class EmployeeTable extends LitElement {
     }));
   }
   
-  /**
-   * Tüm checkbox seçimlerini sıfırla
-   * Bu metot employee-list bileşeni tarafından çağrılır
-   */
   resetSelections() {
-    // Ana checkbox'u temizle
     const headerCheckbox = this.shadowRoot.querySelector('thead input[type="checkbox"]');
     if (headerCheckbox) {
       headerCheckbox.checked = false;
     }
     
-    // Tüm satır checkbox'larını temizle
     const checkboxes = this.shadowRoot.querySelectorAll('tbody input[type="checkbox"]');
     checkboxes.forEach(checkbox => {
       checkbox.checked = false;
     });
     
-    // Seçim durumunu güncelle ("Seçilenleri Sil" butonunu gizlemek için)
     this.hasSelectedEmployees = false;
+  }
+  
+  _getSortIcon(field) {
+    if (this.sortField !== field) {
+      return html`<span class="sort-icon">↕</span>`;
+    }
+    
+    return this.sortDirection === 'asc' 
+      ? html`<span class="sort-icon sort-icon-asc">↑</span>` 
+      : html`<span class="sort-icon sort-icon-desc">↓</span>`;
+  }
+  
+  _handleSort(field) {
+    if (this.sortField === field) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortField = field;
+      this.sortDirection = 'asc';
+    }
+    
+    this.dispatchEvent(new CustomEvent('sort-changed', {
+      detail: { 
+        field: this.sortField, 
+        direction: this.sortDirection 
+      }
+    }));
   }
 }
 

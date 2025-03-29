@@ -64,7 +64,9 @@ export class EmployeeList extends LitElement {
       showDeleteConfirm: { type: Boolean },
       employeeToDelete: { type: Object },
       employeeIdsToDelete: { type: Array },
-      isMultipleDelete: { type: Boolean }
+      isMultipleDelete: { type: Boolean },
+      sortField: { type: String },
+      sortDirection: { type: String }
     };
   }
 
@@ -83,6 +85,8 @@ export class EmployeeList extends LitElement {
     this.employeeToDelete = null;
     this.employeeIdsToDelete = [];
     this.isMultipleDelete = false;
+    this.sortField = 'firstName';
+    this.sortDirection = 'asc';
     
     this._loadEmployees();
   }
@@ -171,9 +175,12 @@ export class EmployeeList extends LitElement {
       return html`
         <employee-table 
           .employees=${this.displayedEmployees}
+          .sortField=${this.sortField}
+          .sortDirection=${this.sortDirection}
           @edit=${this._handleEditEmployee}
           @delete=${this._handleDeleteEmployee}
           @delete-selected=${this._handleDeleteSelectedEmployees}
+          @sort-changed=${this._handleSortChanged}
         ></employee-table>
       `;
     } else {
@@ -258,6 +265,8 @@ export class EmployeeList extends LitElement {
       this.filteredEmployees = this.employeeService.search(this.searchQuery);
     }
     
+    this._sortEmployees();
+    
     this.totalPages = Math.max(1, Math.ceil(this.filteredEmployees.length / this.itemsPerPage));
     
     if (this.currentPage > this.totalPages) {
@@ -312,7 +321,6 @@ export class EmployeeList extends LitElement {
   
   _confirmDelete() {
     if (this.isMultipleDelete) {
-      // Toplu silme işlemi
       if (this.employeeIdsToDelete && this.employeeIdsToDelete.length > 0) {
         this.employeeIdsToDelete.forEach(id => {
           this.employeeService.delete(id);
@@ -321,12 +329,10 @@ export class EmployeeList extends LitElement {
         this.isMultipleDelete = false;
         this.showDeleteConfirm = false;
         
-        // Silme işlemi tamamlandıktan sonra tüm seçimleri sıfırlama
         this._resetAllSelections();
         this._loadEmployees();
       }
     } else if (this.employeeToDelete) {
-      // Tekli silme işlemi
       this.employeeService.delete(this.employeeToDelete.id);
       this.showDeleteConfirm = false;
       this.employeeToDelete = null;
@@ -334,19 +340,49 @@ export class EmployeeList extends LitElement {
     }
   }
   
-  /**
-   * Tüm seçimleri sıfırla ve tüm checkbox'ları temizle
-   * @private
-   */
   _resetAllSelections() {
-    // Tablo görünümündeyken tüm checkbox'ları temizle
     if (this.viewMode === 'table') {
       const tableElement = this.shadowRoot.querySelector('employee-table');
       if (tableElement) {
-        // Tablo bileşenindeki tüm seçimleri sıfırla
         tableElement.resetSelections();
       }
     }
+  }
+  
+  _handleSortChanged(e) {
+    const { field, direction } = e.detail;
+    this.sortField = field;
+    this.sortDirection = direction;
+    
+    this._sortEmployees();
+    this._updateDisplayedEmployees();
+  }
+
+  _sortEmployees() {
+    if (!this.filteredEmployees || this.filteredEmployees.length === 0) return;
+    
+    const sortFn = (a, b) => {
+      let valueA = a[this.sortField];
+      let valueB = b[this.sortField];
+      
+      if (this.sortField === 'dateOfBirth' || this.sortField === 'dateOfEmployment') {
+        valueA = valueA ? new Date(valueA).getTime() : 0;
+        valueB = valueB ? new Date(valueB).getTime() : 0;
+      } 
+      
+      else if (typeof valueA === 'string' && typeof valueB === 'string') {
+        valueA = valueA.toLowerCase();
+        valueB = valueB.toLowerCase();
+      }
+      
+      if (this.sortDirection === 'asc') {
+        return valueA > valueB ? 1 : valueA < valueB ? -1 : 0;
+      } else {
+        return valueA < valueB ? 1 : valueA > valueB ? -1 : 0;
+      }
+    };
+    
+    this.filteredEmployees = [...this.filteredEmployees].sort(sortFn);
   }
   
 
