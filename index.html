@@ -3,8 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Çalışan Yönetim Uygulaması</title>
-  <base href="/">
+  <title>Çalışan Yönetim Uygulaması</title> 
+  <script>
+    (function() {
+      const isGitHubPages = window.location.hostname.includes('github.io');
+      const basePath = isGitHubPages ? '/ing_employee_mng_app/' : '/';
+      document.write('<base href="' + basePath + '">');
+    })();
+  </script>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <script type="importmap">
   {
@@ -15,7 +21,7 @@
     }
   }
   </script>
-  <script type="module" src="./app.js"></script>
+  <script type="module" src="app.js"></script>
   <style>
     body {
       margin: 0;
