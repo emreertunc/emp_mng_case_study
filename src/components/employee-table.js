@@ -16,12 +16,15 @@ export class EmployeeTable extends LitElement {
           overflow-x: auto;
           width: 100%;
           display: block;
+          position: relative;
         }
         
         table {
           width: 100%;
-          border-collapse: collapse;
+          min-width: 1200px;
+          border-collapse: separate;
           border-spacing: 0;
+          table-layout: auto;
         }
         
         th {
@@ -43,13 +46,35 @@ export class EmployeeTable extends LitElement {
         }
         
         .checkbox-cell {
-          width: 40px;
+          width: 60px;
+          min-width: 60px;
+          max-width: 60px;
           text-align: center;
+          position: sticky;
+          left: 0;
+          z-index: 2;
+          background-color: white;
+          box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.1);
+        }
+        
+        tr:hover .checkbox-cell {
+          background-color: #f9f9f9;
         }
         
         .actions-cell {
           width: 100px;
+          min-width: 100px;
+          max-width: 100px;
           text-align: right;
+          position: sticky;
+          right: 0;
+          z-index: 2;
+          background-color: white;
+          box-shadow: -2px 0 5px -2px rgba(0, 0, 0, 0.1);
+        }
+        
+        tr:hover .actions-cell {
+          background-color: #f9f9f9;
         }
         
         .badge {
@@ -74,11 +99,14 @@ export class EmployeeTable extends LitElement {
           background-color: #FF6600; /* ING turuncu rengi */
           color: white;
           border: none;
-          padding: 6px 12px;
+          padding: 8px 16px;
           border-radius: 4px;
           cursor: pointer;
           font-size: 14px;
+          font-weight: bold;
           margin-left: 8px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          transition: background-color 0.2s, transform 0.1s;
         }
         
         .danger-button:hover {
@@ -90,7 +118,7 @@ export class EmployeeTable extends LitElement {
           position: relative;
           user-select: none;
           white-space: nowrap;
-          min-width: 100px;
+          min-width: 120px;
         }
         
         th.actions-cell, th.checkbox-cell {
@@ -141,19 +169,9 @@ export class EmployeeTable extends LitElement {
         <table>
           <thead>
             <tr>
-              <th class="checkbox-cell">
+              <th class="checkbox-cell" style="position: sticky; left: 0; z-index: 3; background-color: #f5f5f5;">
                 <input type="checkbox" @change=${this._handleSelectAll} />
               </th>
-              <th colspan="9" style="text-align: right;">
-                ${this.hasSelectedEmployees ? html`
-                  <button class="danger-button" @click=${this._handleDeleteSelected}>
-                    ${t('delete_selected')}
-                  </button>
-                ` : ''}
-              </th>
-            </tr>
-            <tr>
-              <th class="checkbox-cell"></th>
               <th @click=${() => this._handleSort('firstName')} class="${this.sortField === 'firstName' ? 'sorted-' + this.sortDirection : ''}">
                 <span>${t('first_name')}</span>${this._getSortIcon('firstName')}
               </th>
@@ -178,13 +196,13 @@ export class EmployeeTable extends LitElement {
               <th @click=${() => this._handleSort('position')} class="${this.sortField === 'position' ? 'sorted-' + this.sortDirection : ''}">
                 <span>${t('position')}</span>${this._getSortIcon('position')}
               </th>
-              <th class="actions-cell">${t('actions')}</th>
+              <th class="actions-cell" style="position: sticky; right: 0; z-index: 3; background-color: #f5f5f5;">${t('actions')}</th>
             </tr>
           </thead>
           <tbody>
             ${this.employees.map(employee => html`
               <tr>
-                <td class="checkbox-cell">
+                <td class="checkbox-cell" style="position: sticky; left: 0; background-color: white;">
                   <input type="checkbox" .value=${employee.id} @change=${this._handleCheckboxChange} />
                 </td>
                 <td>${employee.firstName}</td>
@@ -216,7 +234,18 @@ export class EmployeeTable extends LitElement {
           </tbody>
         </table>
       </div>
+      ${this.hasSelectedEmployees ? html`
+        <div style="margin-top: 10px; text-align: right;">
+          <button class="danger-button" @click=${this._handleDeleteSelected}>
+            ${t('delete_selected')} (${this._getSelectedEmployeeCount()})
+          </button>
+        </div>
+      ` : ''}
     `;
+  }
+  
+  _getSelectedEmployeeCount() {
+    return this._getSelectedEmployeeIds().length;
   }
   
   _formatDate(dateString) {
@@ -233,11 +262,20 @@ export class EmployeeTable extends LitElement {
       checkbox.checked = e.target.checked;
     });
     this.hasSelectedEmployees = e.target.checked && checkboxes.length > 0;
+    this.requestUpdate();
   }
   
   _handleCheckboxChange(e) {
-    const checkboxes = this.shadowRoot.querySelectorAll('tbody input[type="checkbox"]:checked');
-    this.hasSelectedEmployees = checkboxes.length > 0;
+    const allCheckboxes = this.shadowRoot.querySelectorAll('tbody input[type="checkbox"]');
+    const checkedCheckboxes = this.shadowRoot.querySelectorAll('tbody input[type="checkbox"]:checked');
+    const headerCheckbox = this.shadowRoot.querySelector('thead input[type="checkbox"]');
+    
+    if (headerCheckbox) {
+      headerCheckbox.checked = checkedCheckboxes.length === allCheckboxes.length;
+    }
+    
+    this.hasSelectedEmployees = checkedCheckboxes.length > 0;
+    this.requestUpdate();
   }
   
   _getSelectedEmployeeIds() {
@@ -278,6 +316,7 @@ export class EmployeeTable extends LitElement {
     });
     
     this.hasSelectedEmployees = false;
+    this.requestUpdate();
   }
   
   _getSortIcon(field) {
